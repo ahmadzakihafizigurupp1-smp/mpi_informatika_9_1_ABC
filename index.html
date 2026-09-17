@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPI Informatika IX - Struktur Data & Visualisasi</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome 6 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind Config & Custom CSS -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: '#4f46e5', // Indigo 600
+                        secondary: '#10b981', // Emerald 500
+                        danger: '#ef4444', // Red 500
+                        dark: '#0f172a' // Slate 900
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom Scrollbar for Main Content */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Hide Scrollbar for Nav Chip Bar */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* 3D Flip Card Styles */
+        .flip-card {
+            background-color: transparent;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            border-radius: 1rem;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .flip-card-front { background: linear-gradient(135deg, #4f46e5, #3b82f6); color: white; }
+        .flip-card-back { background: linear-gradient(135deg, #10b981, #059669); color: white; transform: rotateY(180deg); }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="h-screen flex flex-col bg-slate-50 text-slate-800 overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-slate-900 to-indigo-900 text-white p-4 shadow-lg shrink-0 flex flex-col sm:flex-row justify-between items-center z-20 gap-3">
+        <div class="flex items-center gap-4">
+            <div class="bg-indigo-500/30 px-3 py-1 rounded-full border border-indigo-400 text-xs font-semibold tracking-wider">
+                <i class="fa-solid fa-microchip mr-1"></i> INFORMATIKA IX
+            </div>
+            <h1 class="text-lg md:text-xl font-bold truncate">Struktur Data & Visualisasi</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <div id="module-indicator" class="text-sm font-medium bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">Modul 1 / 7</div>
+            <button onclick="toggleFullScreen()" class="w-9 h-9 rounded-full bg-slate-700 hover:bg-slate-600 transition flex items-center justify-center tooltip-btn" title="Layar Penuh">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Nav Chip Bar -->
+    <nav id="chip-bar" class="hide-scroll flex gap-2 px-4 py-3 bg-white shadow border-b border-slate-200 overflow-x-auto whitespace-nowrap scroll-smooth shrink-0 z-10">
+        <button onclick="switchTab(1, this)" class="chip-btn bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-medium shadow-sm transition hover:bg-indigo-700"><i class="fa-solid fa-book-open mr-2"></i>Konsep Dasar</button>
+        <button onclick="switchTab(2, this)" class="chip-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-5 py-2 rounded-full text-sm font-medium transition"><i class="fa-solid fa-sitemap mr-2"></i>Tree</button>
+        <button onclick="switchTab(3, this)" class="chip-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-5 py-2 rounded-full text-sm font-medium transition"><i class="fa-solid fa-share-nodes mr-2"></i>Graph</button>
+        <button onclick="switchTab(4, this)" class="chip-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-5 py-2 rounded-full text-sm font-medium transition"><i class="fa-solid fa-chart-pie mr-2"></i>Visualisasi</button>
+        <button onclick="switchTab(5, this)" class="chip-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-5 py-2 rounded-full text-sm font-medium transition"><i class="fa-solid fa-clone mr-2"></i>Kuis Flashcard</button>
+        <button onclick="switchTab(6, this)" class="chip-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-5 py-2 rounded-full text-sm font-medium transition"><i class="fa-solid fa-pen-to-square mr-2"></i>Asesmen</button>
+        <button onclick="switchTab(7, this)" class="chip-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-5 py-2 rounded-full text-sm font-medium transition"><i class="fa-solid fa-check-double mr-2"></i>Penutup</button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+        
+        <!-- TAB 1: KONSEP DASAR -->
+        <div id="tab-1" class="tab-content fade-in max-w-5xl mx-auto block">
+            <div class="bg-indigo-600 rounded-2xl p-8 md:p-12 text-white shadow-xl mb-8 relative overflow-hidden">
+                <div class="relative z-10 w-full md:w-2/3">
+                    <span class="bg-indigo-500 text-indigo-50 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4 inline-block">Pendahuluan</span>
+                    <h2 class="text-3xl md:text-5xl font-bold mb-4 leading-tight">Mengenal Struktur & Visualisasi Data</h2>
+                    <p class="text-indigo-100 text-lg leading-relaxed mb-6">Data dalam komputer tidak hanya sekadar disimpan, tetapi harus diatur. Cara mengatur data secara efisien disebut <strong>Struktur Data</strong>. Sementara itu, <strong>Visualisasi Data</strong> adalah teknik menyajikan data tersebut menjadi gambar atau grafik agar mudah dipahami oleh manusia.</p>
+                </div>
+                <i class="fa-solid fa-database absolute -bottom-10 -right-10 text-9xl text-indigo-500/30 transform rotate-12"></i>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Cards for basic concepts -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-sitemap"></i></div>
+                    <h3 class="text-xl font-bold mb-2 text-slate-800">Tree (Pohon)</h3>
+                    <p class="text-slate-600 text-sm">Struktur data hierarkis yang memiliki tingkat (level), di mana ada satu titik awal (root) dan bercabang ke bawah.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-diagram-project"></i></div>
+                    <h3 class="text-xl font-bold mb-2 text-slate-800">Graph (Graf)</h3>
+                    <p class="text-slate-600 text-sm">Struktur data yang menyerupai jaringan, menghubungkan titik-titik (node) melalui garis (edge) tanpa aturan hierarki yang ketat.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                    <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-chart-column"></i></div>
+                    <h3 class="text-xl font-bold mb-2 text-slate-800">Visualisasi</h3>
+                    <p class="text-slate-600 text-sm">Teknik penerjemahan data terstruktur menjadi bentuk visual (grafik, diagram) agar dapat dianalisis dengan cepat.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SUB-TOPIK 1 (TREE) -->
+        <div id="tab-2" class="tab-content fade-in max-w-5xl mx-auto hidden">
+            <div class="bg-white rounded-2xl p-6 md:p-10 shadow-sm border border-slate-200 mb-6 relative overflow-hidden">
+                <div class="flex items-center gap-4 mb-6 relative z-10">
+                    <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl shadow-inner"><i class="fa-solid fa-sitemap"></i></div>
+                    <div>
+                        <p class="text-indigo-600 font-bold text-sm tracking-widest uppercase">Sub-Topik A</p>
+                        <h2 class="text-3xl font-extrabold text-slate-800">Struktur Data Tree</h2>
+                    </div>
+                </div>
+                <p class="text-lg text-slate-700 leading-relaxed mb-6"><strong>Tree (Pohon)</strong> adalah struktur data non-linear yang menyerupai bentuk pohon terbalik. Struktur ini bersifat hierarkis. Elemen dasar dalam tree disebut <strong>Node (simpul)</strong>.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                        <h4 class="font-bold text-slate-800 mb-2">Root (Akar)</h4>
+                        <p class="text-sm text-slate-600">Node paling atas dalam hierarki. Tidak memiliki parent (induk).</p>
+                    </div>
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
+                        <h4 class="font-bold text-slate-800 mb-2">Leaf (Daun)</h4>
+                        <p class="text-sm text-slate-600">Node yang berada di paling bawah dan tidak memiliki child (anak).</p>
+                    </div>
+                </div>
+                <i class="fa-solid fa-tree absolute top-10 right-10 text-9xl text-slate-100/50 -z-0"></i>
+            </div>
+        </div>
+
+        <!-- TAB 3: SUB-TOPIK 2 (GRAPH) -->
+        <div id="tab-3" class="tab-content fade-in max-w-5xl mx-auto hidden">
+            <div class="bg-white rounded-2xl p-6 md:p-10 shadow-sm border border-slate-200 mb-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center text-2xl shadow-inner"><i class="fa-solid fa-share-nodes"></i></div>
+                    <div>
+                        <p class="text-rose-600 font-bold text-sm tracking-widest uppercase">Sub-Topik B</p>
+                        <h2 class="text-3xl font-extrabold text-slate-800">Struktur Data Graph</h2>
+                    </div>
+                </div>
+                <p class="text-lg text-slate-700 leading-relaxed mb-6">Berbeda dengan Tree yang harus memiliki struktur atas-bawah, <strong>Graph (Graf)</strong> adalah struktur data yang menyerupai jaringan bebas. Setiap titik dapat terhubung dengan titik mana saja.</p>
+                <div class="flex flex-col md:flex-row gap-6 mb-6">
+                    <div class="flex-1 bg-slate-900 text-white p-6 rounded-xl relative overflow-hidden">
+                        <h4 class="text-xl font-bold mb-2 text-rose-400">Node / Vertex</h4>
+                        <p class="text-slate-300 text-sm">Merupakan entitas atau titik dari sebuah graph. Representasi dari sebuah objek.</p>
+                    </div>
+                    <div class="flex-1 bg-slate-900 text-white p-6 rounded-xl relative overflow-hidden">
+                        <h4 class="text-xl font-bold mb-2 text-rose-400">Edge / Sisi</h4>
+                        <p class="text-slate-300 text-sm">Garis penghubung antar dua buah Node. Bisa memiliki arah atau tanpa arah.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: SUB-TOPIK 3 (VISUALISASI) -->
+        <div id="tab-4" class="tab-content fade-in max-w-5xl mx-auto hidden">
+            <div class="bg-white rounded-2xl p-6 md:p-10 shadow-sm border border-slate-200 mb-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-2xl shadow-inner"><i class="fa-solid fa-chart-pie"></i></div>
+                    <div>
+                        <p class="text-amber-600 font-bold text-sm tracking-widest uppercase">Sub-Topik C</p>
+                        <h2 class="text-3xl font-extrabold text-slate-800">Visualisasi Data</h2>
+                    </div>
+                </div>
+                <p class="text-lg text-slate-700 leading-relaxed mb-6"><strong>Visualisasi Data</strong> adalah proses menerjemahkan sekumpulan data mentah yang kompleks menjadi bentuk grafis seperti diagram, peta, atau grafik.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="border-t-4 border-blue-500 bg-slate-50 p-5 rounded-b-xl shadow-sm">
+                        <h4 class="font-bold mb-1">Bar Chart (Batang)</h4>
+                        <p class="text-xs text-slate-600">Membandingkan kuantitas/jumlah antar kategori yang berbeda.</p>
+                    </div>
+                    <div class="border-t-4 border-emerald-500 bg-slate-50 p-5 rounded-b-xl shadow-sm">
+                        <h4 class="font-bold mb-1">Line Chart (Garis)</h4>
+                        <p class="text-xs text-slate-600">Menunjukkan tren perubahan data seiring berjalannya waktu.</p>
+                    </div>
+                    <div class="border-t-4 border-amber-500 bg-slate-50 p-5 rounded-b-xl shadow-sm">
+                        <h4 class="font-bold mb-1">Pie Chart (Lingkaran)</h4>
+                        <p class="text-xs text-slate-600">Menunjukkan persentase suatu bagian terhadap keseluruhan.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: KUIS FLASHCARD -->
+        <div id="tab-5" class="tab-content fade-in max-w-5xl mx-auto hidden">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-slate-800">Flashcard Interaktif</h2>
+                <p class="text-slate-600 mt-2">Klik kartu di bawah ini untuk melihat jawaban.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-center">
+                <!-- Card 1 -->
+                <div class="flip-card h-64" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <i class="fa-solid fa-circle-question text-4xl mb-4 text-indigo-200"></i>
+                            <h3 class="text-lg font-bold">Pertanyaan 1</h3>
+                            <p class="text-sm mt-2 font-medium">Apa nama Node paling atas dalam struktur data Tree yang tidak memiliki Parent?</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <i class="fa-solid fa-check text-4xl mb-4 text-emerald-200"></i>
+                            <h3 class="text-xl font-bold uppercase tracking-wider">Root</h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div class="flip-card h-64" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <i class="fa-solid fa-circle-question text-4xl mb-4 text-indigo-200"></i>
+                            <h3 class="text-lg font-bold">Pertanyaan 2</h3>
+                            <p class="text-sm mt-2 font-medium">Sebutkan dua komponen utama pembentuk struktur data Graph!</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <i class="fa-solid fa-check text-4xl mb-4 text-emerald-200"></i>
+                            <h3 class="text-xl font-bold leading-tight">Node & Edge</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: ASESMEN -->
+        <div id="tab-6" class="tab-content fade-in max-w-4xl mx-auto hidden">
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 md:p-10">
+                <div class="text-center mb-8 border-b border-slate-200 pb-6">
+                    <h2 class="text-3xl font-bold text-slate-800">Asesmen Mandiri</h2>
+                    <p class="text-slate-500 mt-2 text-sm">Jawablah pertanyaan di bawah ini dengan singkat.</p>
+                </div>
+                <form id="quiz-form" onsubmit="evaluateQuiz(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 bg-slate-50 rounded-xl border border-slate-200">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Lengkap Siswa</label>
+                            <input type="text" id="siswa-nama" required class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Tanggal Pengerjaan</label>
+                            <input type="date" id="siswa-tanggal" required class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Soal List -->
+                    <div id="soal-container" class="space-y-4">
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white" id="group-1">
+                            <label class="block text-slate-800 font-medium mb-2">1. Titik paling atas pada struktur data tree yang tidak memiliki induk (parent) disebut...</label>
+                            <input type="text" id="q1" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none" autocomplete="off">
+                            <p class="feedback-text text-sm mt-1 hidden"></p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white" id="group-2">
+                            <label class="block text-slate-800 font-medium mb-2">2. Garis yang berfungsi menghubungkan antar titik (node) pada struktur graph disebut...</label>
+                            <input type="text" id="q2" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none" autocomplete="off">
+                            <p class="feedback-text text-sm mt-1 hidden"></p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white" id="group-3">
+                            <label class="block text-slate-800 font-medium mb-2">3. Struktur organisasi kepengurusan OSIS paling tepat digambarkan menggunakan struktur data...</label>
+                            <input type="text" id="q3" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none" autocomplete="off">
+                            <p class="feedback-text text-sm mt-1 hidden"></p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white" id="group-4">
+                            <label class="block text-slate-800 font-medium mb-2">4. Istilah lain yang sering digunakan untuk menyebut titik atau simpul dalam struktur data graph adalah...</label>
+                            <input type="text" id="q4" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none" autocomplete="off">
+                            <p class="feedback-text text-sm mt-1 hidden"></p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white" id="group-5">
+                            <label class="block text-slate-800 font-medium mb-2">5. Grafik yang menggunakan elemen batang vertikal atau horizontal untuk membandingkan jumlah kuantitas data disebut...</label>
+                            <input type="text" id="q5" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none" autocomplete="off">
+                            <p class="feedback-text text-sm mt-1 hidden"></p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white" id="group-6">
+                            <label class="block text-slate-800 font-medium mb-2">6. Jaringan jalan raya antar kota dan navigasi rute merupakan contoh penerapan nyata dari struktur data...</label>
+                            <input type="text" id="q6" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none" autocomplete="off">
+                            <p class="feedback-text text-sm mt-1 hidden"></p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white" id="group-7">
+                            <label class="block text-slate-800 font-medium mb-2">7. Node yang berada paling ujung bawah dan tidak memiliki anak (child) sama sekali pada struktur data tree disebut...</label>
+                            <input type="text" id="q7" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none" autocomplete="off">
+                            <p class="feedback-text text-sm mt-1 hidden"></p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white" id="group-8">
+                            <label class="block text-slate-800 font-medium mb-2">8. Proses menyajikan data mentah menjadi gambar atau grafik agar mudah dianalisis disebut...</label>
+                            <input type="text" id="q8" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none" autocomplete="off">
+                            <p class="feedback-text text-sm mt-1 hidden"></p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white" id="group-9">
+                            <label class="block text-slate-800 font-medium mb-2">9. Jenis diagram yang menunjukkan persentase suatu bagian terhadap keseluruhan dalam bentuk irisan bulat adalah...</label>
+                            <input type="text" id="q9" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none" autocomplete="off">
+                            <p class="feedback-text text-sm mt-1 hidden"></p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white" id="group-10">
+                            <label class="block text-slate-800 font-medium mb-2">10. Dalam struktur hierarki Tree, sebuah node induk yang membawahi node-node lain di bawahnya disebut...</label>
+                            <input type="text" id="q10" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none" autocomplete="off">
+                            <p class="feedback-text text-sm mt-1 hidden"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-slate-200">
+                        <button type="submit" id="btn-submit" class="w-full px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition">
+                            <i class="fa-solid fa-paper-plane mr-2"></i> Periksa Jawaban & Simpan
+                        </button>
+                    </div>
+                </form>
+
+                <div id="result-area" class="mt-8 hidden fade-in text-center">
+                    <h3 class="text-xl font-bold text-indigo-900 mb-2">Skor Anda:</h3>
+                    <div class="text-6xl font-extrabold text-indigo-600 mb-3" id="score-display">0</div>
+                    <div id="gs-status" class="mt-4 text-sm text-slate-500 hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 7: PENUTUP -->
+        <div id="tab-7" class="tab-content fade-in max-w-4xl mx-auto hidden text-center pt-10">
+            <i class="fa-solid fa-graduation-cap text-7xl text-indigo-500 mb-6"></i>
+            <h2 class="text-3xl font-bold text-slate-800 mb-4">Selamat!</h2>
+            <p class="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">Anda telah menyelesaikan Modul ini.</p>
+        </div>
+    </main>
+
+    <!-- Vanilla JS Logic -->
+    <script>
+        document.getElementById('siswa-tanggal').valueAsDate = new Date();
+
+        const answers = [
+            ['root', 'akar'], // Soal 1
+            ['edge', 'garis', 'sisi'], // Soal 2
+            ['tree', 'pohon'], // Soal 3
+            ['node', 'vertex', 'simpul'], // Soal 4
+            ['batang', 'bar', 'bar chart', 'grafik batang'], // Soal 5
+            ['graph', 'graf'], // Soal 6
+            ['leaf', 'daun'], // Soal 7
+            ['visualisasi', 'visualisasi data'], // Soal 8
+            ['lingkaran', 'pie', 'pie chart', 'diagram lingkaran'], // Soal 9
+            ['parent', 'induk', 'parent node'] // Soal 10
+        ];
+
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.querySelectorAll('.chip-btn').forEach(btn => btn.className = 'chip-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-5 py-2 rounded-full text-sm font-medium transition');
+            element.className = 'chip-btn bg-indigo-600 text-white px-5 py-2 rounded-full text-sm font-medium shadow-sm transition hover:bg-indigo-700';
+            element.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            document.getElementById('module-indicator').innerText = `Modul ${tabId} / 7`;
+            document.getElementById('main-content').scrollTop = 0;
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } 
+            else { document.exitFullscreen(); }
+        }
+
+        function evaluateQuiz(e) {
+            e.preventDefault();
+            let score = 0;
+            const multiplier = 10; // Karena sekarang ada 10 soal (100/10)
+
+            for (let i = 1; i <= 10; i++) {
+                const inputEl = document.getElementById(`q${i}`);
+                const userAnswer = inputEl.value.trim().toLowerCase();
+                const groupEl = document.getElementById(`group-${i}`);
+                const feedbackEl = groupEl.querySelector('.feedback-text');
+                const isCorrect = answers[i-1].some(ans => userAnswer === ans);
+
+                feedbackEl.classList.remove('hidden');
+                if (isCorrect) {
+                    score += multiplier;
+                    groupEl.classList.add('bg-emerald-50');
+                    feedbackEl.innerHTML = `<i class="fa-solid fa-check"></i> Tepat!`;
+                    feedbackEl.classList.add('text-emerald-600');
+                } else {
+                    groupEl.classList.add('bg-rose-50');
+                    feedbackEl.innerHTML = `<i class="fa-solid fa-xmark"></i> Kunci: ${answers[i-1][0]}`;
+                    feedbackEl.classList.add('text-rose-600');
+                }
+                inputEl.disabled = true;
+            }
+
+            document.getElementById('btn-submit').disabled = true;
+            document.getElementById('result-area').classList.remove('hidden');
+            document.getElementById('score-display').innerText = Math.round(score);
+
+            saveToGoogleSheets(
+                document.getElementById('siswa-nama').value,
+                document.getElementById('siswa-tanggal').value,
+                Math.round(score)
+            );
+        }
+
+        function saveToGoogleSheets(nama, tanggal, nilai) {
+            const gsStatus = document.getElementById('gs-status');
+            gsStatus.classList.remove('hidden');
+            gsStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan nilai...';
+
+            const scriptURL = 'URL_WEB_APP_GOOGLE_SCRIPT_ANDA'; 
+            
+            // Simulasi Timeout (Ganti dengan fetch() sungguhan jika URL sudah ada)
+            setTimeout(() => {
+                 gsStatus.innerHTML = '<i class="fa-solid fa-check text-emerald-500 mr-1"></i> Data nilai berhasil dicatat.';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
